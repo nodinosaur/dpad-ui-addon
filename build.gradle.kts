@@ -1,6 +1,9 @@
 plugins {
     id("java")
 
+    // Must match the Kotlin version bundled with the IDE
+    // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
+    // https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html
     // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jvm
     id("org.jetbrains.kotlin.jvm") version "2.1.20"
 
@@ -26,13 +29,20 @@ intellijPlatform {
     instrumentCode = true
     projectName = project.name
     autoReload = true
-
     pluginConfiguration {
-        ideaVersion {
-            sinceBuild = "243"
-            untilBuild = "251.*"
-        }
+        /*ideaVersion {
+           sinceBuild = "243"
+           untilBuild = "251.*"
+        }*/
+        //name = "dpad_ui_addon"
+        //group = "co.uk.androidalliance.intellij.plugin.dpad"
+        ideaVersion.sinceBuild = project.property("sinceBuild").toString()
+        ideaVersion.untilBuild = provider { null }
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 configurations.all {
@@ -42,15 +52,27 @@ configurations.all {
 dependencies {
 
     intellijPlatform {
-        instrumentationTools()
-        androidStudio("2024.3.1.14")
         bundledPlugins(
             "org.jetbrains.kotlin",
             "org.jetbrains.android",
             "com.intellij.java",
         )
+        //androidStudio("2024.3.1.14")
+        if (project.hasProperty("localIdeOverride")) {
+            local(property("localIdeOverride").toString())
+        } else {
+            androidStudio(property("ideVersion").toString())
+        }
     }
 
 
-
 }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
+}
+
