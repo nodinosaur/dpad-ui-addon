@@ -10,6 +10,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger // Use platform logger
 import com.android.ddmlib.IDevice // For potentially getting the device
 import com.android.tools.idea.adb.AdbService // Preferred way to get AdbBridge
+import java.awt.Component // Import Component for general swing components
 
 // Keycodes from android.view.KeyEvent
 object AdbKeyCodes {
@@ -33,52 +34,87 @@ class RemoteControlPanel(private val project: Project) : JPanel() {
     init {
         layout = GridBagLayout()
         val gbc = GridBagConstraints()
-        gbc.insets = Insets(5, 5, 5, 5) // Padding
+        // Consistent padding for all components
+        gbc.insets = Insets(5, 5, 5, 5)
+        // Default anchor and fill (can be overridden per component)
+        gbc.anchor = GridBagConstraints.CENTER
+        gbc.fill = GridBagConstraints.NONE
+        gbc.gridwidth = 1
+        gbc.gridheight = 1
+        gbc.weightx = 0.0 // Don't stretch horizontally by default
+        gbc.weighty = 0.0 // Don't stretch vertically by default
 
-        // --- D-Pad ---
+
+        // --- NEW: Back/Home/Settings Column (Left) ---
+        gbc.gridx = 0 // Column 0
+        gbc.anchor = GridBagConstraints.NORTHWEST // Align buttons to top-left within their cell
+        // Optional: Make buttons fill the width of the column if desired
+        // gbc.fill = GridBagConstraints.HORIZONTAL
+        // gbc.weightx = 0.1 // Give slight weight if filling
+
+        // Back Button
+        gbc.gridy = 0
+        add(createAdbButton("Back", AdbKeyCodes.KEYCODE_BACK), gbc)
+
+        // Home Button
+        gbc.gridy = 1
+        add(createAdbButton("Home", AdbKeyCodes.KEYCODE_HOME), gbc)
+
+        // Settings Button
+        gbc.gridy = 2
+        add(createAdbButton("Settings", AdbKeyCodes.KEYCODE_SETTINGS), gbc)
+
+        // Reset anchor/fill/weight if they were changed and shouldn't apply to D-Pad
+        gbc.anchor = GridBagConstraints.CENTER
+        gbc.fill = GridBagConstraints.NONE
+        gbc.weightx = 0.0
+
+
+        // --- D-Pad (Shifted Right) ---
         // Up
-        gbc.gridx = 1
+        gbc.gridx = 2 // Was 1
         gbc.gridy = 0
         add(createAdbButton("↑", AdbKeyCodes.KEYCODE_DPAD_UP), gbc)
 
         // Left
-        gbc.gridx = 0
+        gbc.gridx = 1 // Was 0
         gbc.gridy = 1
         add(createAdbButton("←", AdbKeyCodes.KEYCODE_DPAD_LEFT), gbc)
 
         // Center (OK/Enter)
-        gbc.gridx = 1
+        gbc.gridx = 2 // Was 1
         gbc.gridy = 1
         add(createAdbButton("OK", AdbKeyCodes.KEYCODE_DPAD_CENTER), gbc) // Or KEYCODE_ENTER
 
         // Right
-        gbc.gridx = 2
+        gbc.gridx = 3 // Was 2
         gbc.gridy = 1
         add(createAdbButton("→", AdbKeyCodes.KEYCODE_DPAD_RIGHT), gbc)
 
         // Down
-        gbc.gridx = 1
+        gbc.gridx = 2 // Was 1
         gbc.gridy = 2
         add(createAdbButton("↓", AdbKeyCodes.KEYCODE_DPAD_DOWN), gbc)
 
+        // --- Optional: Add glue components to push everything to the top-left ---
+        // Add a component that takes up all remaining horizontal space
+        gbc.gridx = 4 // Next available column after the D-Pad
+        gbc.gridy = 0
+        gbc.weightx = 1.0 // Give this component horizontal weight
+        gbc.fill = GridBagConstraints.HORIZONTAL
+        add(JPanel().apply { isOpaque = false }, gbc) // Add an invisible panel
 
-        // --- Other Buttons ---
-        gbc.gridx = 0 // Reset X position for next row
-        gbc.gridy = 3
-        gbc.gridwidth = 1 // Reset grid width if changed
-        add(createAdbButton("Back", AdbKeyCodes.KEYCODE_BACK), gbc)
+        // Add a component that takes up all remaining vertical space
+        gbc.gridx = 0
+        gbc.gridy = 3 // Next available row
+        gbc.weighty = 1.0 // Give this component vertical weight
+        gbc.gridwidth = 5 // Span all columns used
+        gbc.fill = GridBagConstraints.VERTICAL
+        add(JPanel().apply { isOpaque = false }, gbc) // Add an invisible panel
 
-        gbc.gridx = 1
-        gbc.gridy = 3
-        add(createAdbButton("Home", AdbKeyCodes.KEYCODE_HOME), gbc)
-
-        gbc.gridx = 2
-        gbc.gridy = 3
-        add(createAdbButton("Settings", AdbKeyCodes.KEYCODE_SETTINGS), gbc)
-
-        // Add other buttons from the screenshot if desired (like the icons above/below D-Pad)
-        // You'd need corresponding keycodes or ADB intent commands.
     }
+
+    // --- Rest of the class (createAdbButton, sendAdbKeyEvent, AdbShellResponseHandler) remains the same ---
 
     private fun createAdbButton(text: String, keyCode: Int): JButton {
         val button = JButton(text)
@@ -115,17 +151,6 @@ class RemoteControlPanel(private val project: Project) : JPanel() {
                 LOG.info("Sending key event $keyCode to device ${device.serialNumber}")
                 // Using executeShellCommand - more robust than Runtime.exec
                 device.executeShellCommand("input keyevent $keyCode", AdbShellResponseHandler())
-
-
-                // Alternative using Runtime.exec (less recommended within IDE plugin):
-                // val command = "adb shell input keyevent $keyCode"
-                // val process = Runtime.getRuntime().exec(command)
-                // val exitCode = process.waitFor()
-                // if (exitCode != 0) {
-                //    LOG.warn("ADB command failed: $command (Exit code: $exitCode)")
-                // } else {
-                //    LOG.info("ADB command success: $command")
-                // }
 
             } catch (e: Exception) {
                 LOG.error("Error sending ADB key event $keyCode", e)

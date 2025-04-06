@@ -19,6 +19,7 @@ dist/
 
 # JetBrains IDE
 .idea/
+.intellijPlatform/
 
 # Unit test reports
 TEST*.xml
