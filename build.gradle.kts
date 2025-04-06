@@ -1,13 +1,16 @@
 plugins {
     id("java")
 
-    //kotlin("plugin.serialization") version "2.0.0"
-    id("org.jetbrains.kotlin.jvm") version "2.0.0"
-    id("org.jetbrains.intellij.platform") version "2.0.0"
+    // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jvm
+    id("org.jetbrains.kotlin.jvm") version "2.1.20"
+
+    // https://plugins.gradle.org/plugin/org.jetbrains.intellij.platform
+    // https://github.com/JetBrains/gradle-intellij-plugin/releases
+    id("org.jetbrains.intellij.platform") version "2.5.0"
 }
 
 group = "uk.co.androidalliance"
-version = "1.0-SNAPSHOT"
+version = "1.0.1-SNAPSHOT"
 
 repositories {
     google()
@@ -27,7 +30,7 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "243"
-            untilBuild = "243.*"
+            untilBuild = "251.*"
         }
     }
 }
