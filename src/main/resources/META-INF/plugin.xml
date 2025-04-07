@@ -39,7 +39,7 @@
                 id="Directional Pad"
                 anchor="right"
                 factoryClass="uk.co.androidalliance.dpad.RemoteControlToolWindowFactory"
-                icon="/icons/dpad.svg"/>
+                icon="/icons/dpad_13px.svg"/>
     </extensions>
 
     <actions>

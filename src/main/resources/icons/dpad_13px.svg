@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://plugins.jetbrains.com/docs/intellij/icons-style.html -->
+<svg version="1.1" id="Layer_2" xmlns="http://www.w3.org/2000/svg"
+     x="0px" y="0px"
+     width="13px" height="13px"
+     viewBox="0 0 13 13">
+    <g>
+        <g>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#AFB1B3" stroke-linecap="round"
+                     stroke-linejoin="round" stroke-miterlimit="3"
+                     points="7.555,11.483 5.361,11.483 5.361,9.137 6.483,8.064 7.555,9.137"/>
+        </g>
+        <g>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#AFB1B3" stroke-linecap="round"
+                     stroke-linejoin="round" stroke-miterlimit="3"
+                     points="7.555,1.483 7.555,3.729 6.483,4.902 5.361,3.729 5.361,1.483"/>
+        </g>
+        <g>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#AFB1B3" stroke-linecap="round"
+                     stroke-linejoin="round" stroke-miterlimit="3"
+                     points="11.483,7.555 9.137,7.555 8.064,6.483 9.137,5.361 11.483,5.361"/>
+        </g>
+        <g>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="none" stroke="#AFB1B3" stroke-linecap="round"
+                     stroke-linejoin="round" stroke-miterlimit="3"
+                     points="3.729,5.361 4.902,6.483 3.729,7.555 1.483,7.555 1.483,5.361"/>
+        </g>
+    </g>
+</svg>
