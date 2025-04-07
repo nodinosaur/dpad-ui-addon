@@ -5,12 +5,12 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 
-class RemoteControlToolWindowFactory : ToolWindowFactory {
+class DPadToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val remoteControlPanel = RemoteControlPanel(project) // Pass project if needed
+        val dPadToolWindowContent = DPadToolWindowContent(project) // Pass project if needed
         val contentFactory = ContentFactory.getInstance() // Use getInstance() instead of service()
-        val content = contentFactory.createContent(remoteControlPanel, "", false)
+        val content = contentFactory.createContent(dPadToolWindowContent, "", false)
         toolWindow.contentManager.addContent(content)
     }
 }

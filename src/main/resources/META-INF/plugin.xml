@@ -38,7 +38,7 @@
         <toolWindow
                 id="Directional Pad"
                 anchor="right"
-                factoryClass="uk.co.androidalliance.dpad.RemoteControlToolWindowFactory"
+                factoryClass="uk.co.androidalliance.dpad.DPadToolWindowFactory"
                 icon="/icons/dpad_13px.svg"/>
     </extensions>
 

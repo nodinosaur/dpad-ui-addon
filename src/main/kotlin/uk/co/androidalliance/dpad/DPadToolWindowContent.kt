@@ -13,9 +13,9 @@ import com.android.ddmlib.IDevice
 import com.android.tools.idea.adb.AdbService
 
 /** Main panel containing the D-pad and additional control buttons */
-class RemoteControlPanel(private val project: Project) : JPanel() {
+class DPadToolWindowContent(private val project: Project) : JPanel() {
 
-    private val LOG = Logger.getInstance(RemoteControlPanel::class.java)
+    private val LOG = Logger.getInstance(DPadToolWindowContent::class.java)
 
     init {
         layout = GridBagLayout()
