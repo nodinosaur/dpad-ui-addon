@@ -8,7 +8,7 @@
     <name>D-Pad (Directional Pad UI Addon)</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="support@androidalliance.co.uk" url="https://www.androidalliance.co.uk">George Medve (Android Alliance)</vendor>
+    <vendor url="https://www.androidalliance.co.uk">George Medve (Android Alliance)</vendor>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Notification group for logging -->
