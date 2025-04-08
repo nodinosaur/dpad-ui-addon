@@ -6,11 +6,12 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBPanel
+import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
+import java.awt.Font
 import java.awt.GridLayout
 import javax.swing.JButton
 import javax.swing.JPanel
-import javax.swing.border.EmptyBorder
 
 /** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
@@ -20,20 +21,26 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     init {
 
         val panel = JBPanel<JBPanel<*>>(BorderLayout())
-        panel.border = EmptyBorder(0, 0, 0, 0)
+        panel.border = JBUI.Borders.empty()
 
         // Main row panel with horizontal layout
         val rowPanel = JBPanel<JBPanel<*>>(GridLayout(1, 2, 10, 0))
 
         // Column with buttons
-        val buttonColumn = JBPanel<JBPanel<*>>(GridLayout(3, 1, 0, 5))
+        val lhButtonColumn = JBPanel<JBPanel<*>>(GridLayout(3, 1, 0, 5))
 
-        buttonColumn.add(createLabelButton("Back", KEYCODE_BACK))
-        buttonColumn.add(createLabelButton("Home", KEYCODE_HOME))
-        buttonColumn.add(createLabelButton("Settings", KEYCODE_SETTINGS))
+        lhButtonColumn.add(createLabelButton("⚙", KEYCODE_SETTINGS))
+        lhButtonColumn.add(createLabelButton("⌂", KEYCODE_HOME))
+        lhButtonColumn.add(createLabelButton("↩", KEYCODE_BACK))
 
         // D-pad panel
-        val dPadPanel = DPadPanel()
+        val dPadPanel = DPadPanel(dPadSize = 120)
+
+        val rhButtonColumn = JBPanel<JBPanel<*>>(GridLayout(3, 1, 0, 5))
+
+        rhButtonColumn.add(createLabelButton("bookmark", KEYCODE_BOOKMARK))
+        rhButtonColumn.add(createLabelButton("contacts", KEYCODE_CONTACTS))
+        rhButtonColumn.add(createLabelButton("guide", KEYCODE_TV))
 
         // Set D-pad direction click callback
         dPadPanel.setOnDirectionClickListener { direction ->
@@ -72,8 +79,9 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         }
 
         // Add components to main row
-        rowPanel.add(buttonColumn)
+        rowPanel.add(lhButtonColumn)
         rowPanel.add(dPadPanel)
+        rowPanel.add(rhButtonColumn)
 
         panel.add(rowPanel, BorderLayout.CENTER)
         this.add(panel, BorderLayout.CENTER)
@@ -82,6 +90,8 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     /** Creates a text-based button with the specified label and key code */
     private fun createLabelButton(text: String, keyCode: Int): JButton {
         val button = JButton(text)
+        button.font = Font("SansSerif", Font.PLAIN, 16)
+        button.setBounds(0, 0, 50, 80)
         button.addActionListener {
             sendAdbKeyEvent(keyCode)
         }
@@ -134,14 +144,64 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     }
 
     companion object AdbKeyCodes {
+        // D-Pad navigation
         const val KEYCODE_DPAD_UP = 19
         const val KEYCODE_DPAD_DOWN = 20
         const val KEYCODE_DPAD_LEFT = 21
         const val KEYCODE_DPAD_RIGHT = 22
         const val KEYCODE_DPAD_CENTER = 23
+
+        // System navigation
         const val KEYCODE_BACK = 4
         const val KEYCODE_HOME = 3
+        const val KEYCODE_APP_SWITCH = 187  // Recent apps/app switcher
         const val KEYCODE_SETTINGS = 176
+
+        // Volume controls
+        const val KEYCODE_VOLUME_UP = 24
+        const val KEYCODE_VOLUME_DOWN = 25
+        const val KEYCODE_VOLUME_MUTE = 164
+
+        // Media controls
+        const val KEYCODE_MEDIA_PLAY_PAUSE = 85
+        const val KEYCODE_MEDIA_NEXT = 87
+        const val KEYCODE_MEDIA_PREVIOUS = 88
+
+        // Power
+        const val KEYCODE_POWER = 26
+
+        // Standard keys
+        const val KEYCODE_ENTER = 66
+        const val KEYCODE_TAB = 61
+        const val KEYCODE_SPACE = 62
+        const val KEYCODE_DEL = 67  // Backspace
+
+        // Navigation in content
+        const val KEYCODE_PAGE_UP = 92
+        const val KEYCODE_PAGE_DOWN = 93
+        const val KEYCODE_MOVE_HOME = 122
+        const val KEYCODE_MOVE_END = 123
+
+        // TV specific
+        const val KEYCODE_TV = 170
+        const val KEYCODE_GUIDE = 172       // Opens the program guide within TV apps
+        const val KEYCODE_TV_POWER = 177    // TV power on/off
+        const val KEYCODE_TV_INPUT = 178    // Used to change TV input sources
+
+        // Android TV navigation
+        const val KEYCODE_NAVIGATE_NEXT = 261
+        const val KEYCODE_NAVIGATE_PREVIOUS = 262
+
+        // Search
+        const val KEYCODE_SEARCH = 84
+
+        // Useful for testing
+        const val KEYCODE_MENU = 82
+        const val KEYCODE_NOTIFICATION = 83
+
+
+        const val KEYCODE_BOOKMARK = 174
+        const val KEYCODE_CONTACTS = 207
     }
 
 }

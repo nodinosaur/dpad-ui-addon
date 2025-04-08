@@ -6,7 +6,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JPanel
 
-class DPadPanel : JPanel() {
+class DPadPanel(val dPadSize: Int = 120) : JPanel() {
     private val LOG = Logger.getInstance(DPadPanel::class.java)
 
     private val segments = arrayOf(
@@ -23,8 +23,7 @@ class DPadPanel : JPanel() {
     private var clickHandler: ((Int) -> Unit)? = null
 
     init {
-        preferredSize = Dimension(150, 150)
-        background = Color(230, 255, 230) // Light green background
+        preferredSize = Dimension(dPadSize, dPadSize)
 
         addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
@@ -90,7 +89,9 @@ class DPadPanel : JPanel() {
         val height = height
         val centerX = width / 2
         val centerY = height / 2
-        val squareSize = minOf(width, height) / 5
+        val squareSize = minOf(width, height) / 3
+        val segmentDown = Color(61, 80, 89)
+        val segmentUp = Color(84, 110, 122)
 
         // Create center square
         centerSquare = Rectangle(
@@ -104,45 +105,49 @@ class DPadPanel : JPanel() {
 
         // Up segment
         segments[UP].reset()
-        segments[UP].addPoint(centerX - squareSize, centerY - squareSize / 2)
-        segments[UP].addPoint(centerX + squareSize, centerY - squareSize / 2)
-        segments[UP].addPoint(centerX, centerY - squareSize * 2)
+        segments[UP].addPoint(centerX - squareSize / 2, centerY - squareSize / 2)
+        segments[UP].addPoint(centerX + squareSize / 2, centerY - squareSize / 2)
+        segments[UP].addPoint(width, 0)
+        segments[UP].addPoint(0, 0)
 
         // Right segment
         segments[RIGHT].reset()
-        segments[RIGHT].addPoint(centerX + squareSize / 2, centerY - squareSize)
-        segments[RIGHT].addPoint(centerX + squareSize / 2, centerY + squareSize)
-        segments[RIGHT].addPoint(centerX + squareSize * 2, centerY)
+        segments[RIGHT].addPoint(centerX + squareSize / 2, centerY - squareSize / 2)
+        segments[RIGHT].addPoint(centerX + squareSize / 2, centerY + squareSize / 2)
+        segments[RIGHT].addPoint(width, height)
+        segments[RIGHT].addPoint(width, 0)
 
         // Down segment
         segments[DOWN].reset()
-        segments[DOWN].addPoint(centerX - squareSize, centerY + squareSize / 2)
-        segments[DOWN].addPoint(centerX + squareSize, centerY + squareSize / 2)
-        segments[DOWN].addPoint(centerX, centerY + squareSize * 2)
+        segments[DOWN].addPoint(centerX - squareSize / 2, centerY + squareSize / 2)
+        segments[DOWN].addPoint(centerX + squareSize / 2, centerY + squareSize / 2)
+        segments[DOWN].addPoint(width, height)
+        segments[DOWN].addPoint(0, height)
 
         // Left segment
         segments[LEFT].reset()
-        segments[LEFT].addPoint(centerX - squareSize / 2, centerY - squareSize)
-        segments[LEFT].addPoint(centerX - squareSize / 2, centerY + squareSize)
-        segments[LEFT].addPoint(centerX - squareSize * 2, centerY)
+        segments[LEFT].addPoint(centerX - squareSize / 2, centerY - squareSize / 2)
+        segments[LEFT].addPoint(centerX - squareSize / 2, centerY + squareSize / 2)
+        segments[LEFT].addPoint(0, height)
+        segments[LEFT].addPoint(0, 0)
 
         // Draw segments with different colors based on active state
         for (i in segments.indices) {
-            g2d.color = if (i == activeSegment) Color.LIGHT_GRAY else Color.WHITE
+            g2d.color = if (i == activeSegment) segmentDown else segmentUp
             g2d.fill(segments[i])
             g2d.color = Color.BLACK
             g2d.draw(segments[i])
         }
 
         // Draw center square
-        g2d.color = if (activeSegment == CENTER) Color.LIGHT_GRAY else Color.WHITE
+        g2d.color = if (activeSegment == CENTER) segmentDown else segmentUp
         g2d.fill(centerSquare)
         g2d.color = Color.BLACK
         g2d.draw(centerSquare)
 
         // Optional: Add direction labels
         g2d.color = Color.BLACK
-        g2d.font = Font("SansSerif", Font.BOLD, 10)
+        g2d.font = Font("SansSerif", Font.BOLD, 12)
         g2d.drawString("↑", centerX - 5, centerY - squareSize)
         g2d.drawString("→", centerX + squareSize, centerY + 5)
         g2d.drawString("↓", centerX - 5, centerY + squareSize + 15)
