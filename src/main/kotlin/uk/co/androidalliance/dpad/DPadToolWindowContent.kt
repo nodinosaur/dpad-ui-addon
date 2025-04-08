@@ -2,7 +2,7 @@ package uk.co.androidalliance.dpad
 
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.adb.AdbService
-import com.android.tools.r8.internal.Se
+import uk.co.androidalliance.dpad.theme.Typography.controlButtons
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -12,8 +12,7 @@ import com.intellij.ui.scale.JBUIScale
 import java.awt.*
 import javax.swing.JButton
 import javax.swing.JPanel
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUp
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUpDark
 
 /** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
@@ -35,10 +34,6 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         lhButtonColumn.add(createIconButton("/icons/fill/home_24dp", "Home", KEYCODE_HOME))
         lhButtonColumn.add(createIconButton("/icons/fill/arrow_back_24dp.svg", "Back", KEYCODE_BACK))
 
-        //lhButtonColumn.add(createLabelButton("⚙", KEYCODE_SETTINGS))
-        //lhButtonColumn.add(createLabelButton("⌂", KEYCODE_HOME))
-        //lhButtonColumn.add(createLabelButton("↩", KEYCODE_BACK))
-
         // D-pad panel
         val dPadPanel = DPadPanel(dPadSize = 120)
 
@@ -46,10 +41,6 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         rhButtonColumn.add(createIconButton("/icons/outline/bookmark_24dp.svg", "Bookmark", KEYCODE_BOOKMARK))
         rhButtonColumn.add(createIconButton("/icons/fill/person_24dp.svg", "Accounts", KEYCODE_CONTACTS))
         rhButtonColumn.add(createIconButton("/icons/outline/live_tv_24dp.svg", "Live TV", KEYCODE_TV))
-
-        //rhButtonColumn.add(createLabelButton("bookmark", KEYCODE_BOOKMARK))
-        //rhButtonColumn.add(createLabelButton("contacts", KEYCODE_CONTACTS))
-        //rhButtonColumn.add(createLabelButton("guide", KEYCODE_TV))
 
         // Set D-pad direction click callback
         dPadPanel.setOnDirectionClickListener { direction ->
@@ -98,7 +89,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     /** Creates a text-based button with the specified label and key code */
     private fun createLabelButton(text: String, keyCode: Int): JButton {
         val button = JButton(text)
-        button.font = Font("SansSerif", Font.PLAIN, 16)
+        button.font = controlButtons
         button.addActionListener {
             sendAdbKeyEvent(keyCode)
         }
@@ -111,7 +102,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     ): JButton {
         val icon = IconLoader.getIcon(iconPath, this::class.java)
         val button = JButton(icon)
-        button.background = SegmentUp
+        button.background = SegmentUpDark
         button.toolTipText = tooltipText
         button.isBorderPainted = false
         button.isContentAreaFilled = true

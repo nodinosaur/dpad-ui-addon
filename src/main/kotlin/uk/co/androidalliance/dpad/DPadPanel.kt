@@ -1,8 +1,10 @@
 package uk.co.androidalliance.dpad
 
 import com.intellij.openapi.diagnostic.Logger
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUp
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDownDark
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentOutlineDark
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUpDark
+import uk.co.androidalliance.dpad.theme.Typography.dPadNavigation
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -133,21 +135,21 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
 
         // Draw segments with different colors based on active state
         for (i in segments.indices) {
-            g2d.color = if (i == activeSegment) SegmentDown else SegmentUp
+            g2d.color = if (i == activeSegment) SegmentDownDark else SegmentUpDark
             g2d.fill(segments[i]) // Draws the fill
-            g2d.color = Color.DARK_GRAY
+            g2d.color = SegmentOutlineDark
             g2d.draw(segments[i]) // Draws the outline
         }
 
         // Draw center square
-        g2d.color = if (activeSegment == CENTER) SegmentDown else SegmentUp
+        g2d.color = if (activeSegment == CENTER) SegmentDownDark else SegmentUpDark
         g2d.fill(centerSquare) // Draws the fill
-        g2d.color = Color.DARK_GRAY
+        g2d.color = SegmentOutlineDark
         g2d.draw(centerSquare) // Draws the outline
 
         // Optional: Add direction labels
-        g2d.color = Color.DARK_GRAY
-        g2d.font = Font("SansSerif", Font.BOLD, 12)
+        g2d.color = SegmentOutlineDark
+        g2d.font = dPadNavigation
         g2d.drawString("↑", centerX - 5, centerY - squareSize)
         g2d.drawString("→", centerX + squareSize, centerY + 5)
         g2d.drawString("↓", centerX - 5, centerY + squareSize + 15)
