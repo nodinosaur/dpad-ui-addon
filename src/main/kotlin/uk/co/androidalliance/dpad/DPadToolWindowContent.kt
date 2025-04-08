@@ -2,16 +2,18 @@ package uk.co.androidalliance.dpad
 
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.adb.AdbService
+import com.android.tools.r8.internal.Se
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.components.JBPanel
-import com.intellij.util.ui.JBUI
-import java.awt.BorderLayout
-import java.awt.Font
-import java.awt.GridLayout
+import com.intellij.ui.scale.JBUIScale
+import java.awt.*
 import javax.swing.JButton
 import javax.swing.JPanel
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUp
 
 /** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
@@ -19,28 +21,35 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     private val LOG = Logger.getInstance(DPadToolWindowContent::class.java)
 
     init {
+        layout = FlowLayout(FlowLayout.CENTER, 0, 0)
 
-        val panel = JBPanel<JBPanel<*>>(BorderLayout())
-        panel.border = JBUI.Borders.empty()
+        // Create a panel for all controls
+        val controlsPanel = JPanel() // Keep internal spacing
 
-        // Main row panel with horizontal layout
-        val rowPanel = JBPanel<JBPanel<*>>(GridLayout(1, 2, 10, 0))
+        // Create a panel for all controls with FlowLayout aligned LEFT
+        //val controlsPanel = JPanel(FlowLayout(FlowLayout.LEFT, 10, 10)) // Keep internal spacing
 
         // Column with buttons
-        val lhButtonColumn = JBPanel<JBPanel<*>>(GridLayout(3, 1, 0, 5))
+        val lhButtonColumn: JBPanel<JBPanel<*>> = JBPanel(GridLayout(3, 1, 0, 5))
+        lhButtonColumn.add(createIconButton("/icons/outline/settings_24dp", "Settings", KEYCODE_SETTINGS))
+        lhButtonColumn.add(createIconButton("/icons/fill/home_24dp", "Home", KEYCODE_HOME))
+        lhButtonColumn.add(createIconButton("/icons/fill/arrow_back_24dp.svg", "Back", KEYCODE_BACK))
 
-        lhButtonColumn.add(createLabelButton("⚙", KEYCODE_SETTINGS))
-        lhButtonColumn.add(createLabelButton("⌂", KEYCODE_HOME))
-        lhButtonColumn.add(createLabelButton("↩", KEYCODE_BACK))
+        //lhButtonColumn.add(createLabelButton("⚙", KEYCODE_SETTINGS))
+        //lhButtonColumn.add(createLabelButton("⌂", KEYCODE_HOME))
+        //lhButtonColumn.add(createLabelButton("↩", KEYCODE_BACK))
 
         // D-pad panel
         val dPadPanel = DPadPanel(dPadSize = 120)
 
-        val rhButtonColumn = JBPanel<JBPanel<*>>(GridLayout(3, 1, 0, 5))
+        val rhButtonColumn: JBPanel<JBPanel<*>> = JBPanel(GridLayout(3, 1, 0, 5))
+        rhButtonColumn.add(createIconButton("/icons/outline/bookmark_24dp.svg", "Bookmark", KEYCODE_BOOKMARK))
+        rhButtonColumn.add(createIconButton("/icons/fill/person_24dp.svg", "Accounts", KEYCODE_CONTACTS))
+        rhButtonColumn.add(createIconButton("/icons/outline/live_tv_24dp.svg", "Live TV", KEYCODE_TV))
 
-        rhButtonColumn.add(createLabelButton("bookmark", KEYCODE_BOOKMARK))
-        rhButtonColumn.add(createLabelButton("contacts", KEYCODE_CONTACTS))
-        rhButtonColumn.add(createLabelButton("guide", KEYCODE_TV))
+        //rhButtonColumn.add(createLabelButton("bookmark", KEYCODE_BOOKMARK))
+        //rhButtonColumn.add(createLabelButton("contacts", KEYCODE_CONTACTS))
+        //rhButtonColumn.add(createLabelButton("guide", KEYCODE_TV))
 
         // Set D-pad direction click callback
         dPadPanel.setOnDirectionClickListener { direction ->
@@ -78,23 +87,39 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
             }
         }
 
-        // Add components to main row
-        rowPanel.add(lhButtonColumn)
-        rowPanel.add(dPadPanel)
-        rowPanel.add(rhButtonColumn)
+        // Add components to the grouping panel
+        controlsPanel.add(lhButtonColumn)
+        controlsPanel.add(dPadPanel)
+        controlsPanel.add(rhButtonColumn)
 
-        panel.add(rowPanel, BorderLayout.CENTER)
-        this.add(panel, BorderLayout.CENTER)
+        add(controlsPanel)
     }
 
     /** Creates a text-based button with the specified label and key code */
     private fun createLabelButton(text: String, keyCode: Int): JButton {
         val button = JButton(text)
         button.font = Font("SansSerif", Font.PLAIN, 16)
-        button.setBounds(0, 0, 50, 80)
         button.addActionListener {
             sendAdbKeyEvent(keyCode)
         }
+        return button
+    }
+
+    private fun createIconButton(
+        iconPath: String, tooltipText: String,
+        keyCode: Int
+    ): JButton {
+        val icon = IconLoader.getIcon(iconPath, this::class.java)
+        val button = JButton(icon)
+        button.background = SegmentUp
+        button.toolTipText = tooltipText
+        button.isBorderPainted = false
+        button.isContentAreaFilled = true
+        button.preferredSize = Dimension(
+            JBUIScale.scale(40),
+            JBUIScale.scale(40)
+        )
+        button.addActionListener { sendAdbKeyEvent(keyCode) }
         return button
     }
 

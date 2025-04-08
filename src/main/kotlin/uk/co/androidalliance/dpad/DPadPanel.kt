@@ -1,6 +1,8 @@
 package uk.co.androidalliance.dpad
 
 import com.intellij.openapi.diagnostic.Logger
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUp
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -90,8 +92,6 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
         val centerX = width / 2
         val centerY = height / 2
         val squareSize = minOf(width, height) / 3
-        val segmentDown = Color(61, 80, 89)
-        val segmentUp = Color(84, 110, 122)
 
         // Create center square
         centerSquare = Rectangle(
@@ -133,26 +133,26 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
 
         // Draw segments with different colors based on active state
         for (i in segments.indices) {
-            g2d.color = if (i == activeSegment) segmentDown else segmentUp
-            g2d.fill(segments[i])
-            g2d.color = Color.BLACK
-            g2d.draw(segments[i])
+            g2d.color = if (i == activeSegment) SegmentDown else SegmentUp
+            g2d.fill(segments[i]) // Draws the fill
+            g2d.color = Color.DARK_GRAY
+            g2d.draw(segments[i]) // Draws the outline
         }
 
         // Draw center square
-        g2d.color = if (activeSegment == CENTER) segmentDown else segmentUp
-        g2d.fill(centerSquare)
-        g2d.color = Color.BLACK
-        g2d.draw(centerSquare)
+        g2d.color = if (activeSegment == CENTER) SegmentDown else SegmentUp
+        g2d.fill(centerSquare) // Draws the fill
+        g2d.color = Color.DARK_GRAY
+        g2d.draw(centerSquare) // Draws the outline
 
         // Optional: Add direction labels
-        g2d.color = Color.BLACK
+        g2d.color = Color.DARK_GRAY
         g2d.font = Font("SansSerif", Font.BOLD, 12)
         g2d.drawString("↑", centerX - 5, centerY - squareSize)
         g2d.drawString("→", centerX + squareSize, centerY + 5)
         g2d.drawString("↓", centerX - 5, centerY + squareSize + 15)
         g2d.drawString("←", centerX - squareSize - 10, centerY + 5)
-        g2d.drawString("OK", centerX - 8, centerY + 4) // Add "OK" text to center
+        g2d.drawString("", centerX - 8, centerY + 4) // Add "OK" text to center
     }
 
     companion object {
