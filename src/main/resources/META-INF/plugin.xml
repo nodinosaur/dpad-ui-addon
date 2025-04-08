@@ -5,10 +5,19 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Directional Pad UI Addon (D-Pad)</name>
+    <name>D-Pad (Directional Pad UI Addon)</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="support@androidalliance.co.uk" url="https://www.androidalliance.co.uk">George Medve (Android Alliance)</vendor>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Notification group for logging -->
+        <notificationGroup displayType="NONE" id="Dpad (Logging)" isLogByDefault="true" />
+
+        <!-- Notification group for errors -->
+        <notificationGroup displayType="BALLOON" id="Dpad (Errors)" isLogByDefault="true" />
+    </extensions>
+
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
@@ -29,6 +38,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.kotlin</depends>
     <depends>org.jetbrains.android</depends>
+    <depends>com.intellij.modules.androidstudio</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->

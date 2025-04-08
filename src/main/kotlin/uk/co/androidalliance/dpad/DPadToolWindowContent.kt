@@ -2,17 +2,19 @@ package uk.co.androidalliance.dpad
 
 import com.android.ddmlib.IDevice
 import com.android.tools.idea.adb.AdbService
-import uk.co.androidalliance.dpad.theme.Typography.controlButtons
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.scale.JBUIScale
-import java.awt.*
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUpDark
+import uk.co.androidalliance.dpad.theme.Typography.controlButtons
+import java.awt.Dimension
+import java.awt.FlowLayout
+import java.awt.GridLayout
 import javax.swing.JButton
 import javax.swing.JPanel
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUpDark
 
 /** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
