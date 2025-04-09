@@ -5,13 +5,17 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 
 object NotificationHelper {
+    private const val DEBUG = false
+    private const val ADDON = "Dpad (Logging)"
+
     fun info(message: String) {
+        if (!DEBUG) return
         sendNotification(
             message,
             NotificationType.INFORMATION,
             NotificationGroupManager
                 .getInstance()
-                .getNotificationGroup("Dpad (Logging)")
+                .getNotificationGroup(ADDON)
         )
     }
 
@@ -21,7 +25,7 @@ object NotificationHelper {
             NotificationType.WARNING,
             NotificationGroupManager
                 .getInstance()
-                .getNotificationGroup("Dpad (Logging)")
+                .getNotificationGroup(ADDON)
         )
     }
 
@@ -32,7 +36,7 @@ object NotificationHelper {
             NotificationType.ERROR,
             NotificationGroupManager
                 .getInstance()
-                .getNotificationGroup("Dpad (Logging)")
+                .getNotificationGroup(ADDON)
         )
     }
 
@@ -44,7 +48,7 @@ object NotificationHelper {
     ) {
         // Create the notification without a listener
         val notification = notificationGroup.createNotification(
-            "ADB IDEA",
+            "Dpad",
             escapeString(message),
             notificationType,
         )

@@ -1,10 +1,10 @@
 package uk.co.androidalliance.dpad.adb
 
-import com.intellij.openapi.diagnostic.Logger
+import com.android.ddmlib.IShellOutputReceiver
 import uk.co.androidalliance.dpad.notify.NotificationHelper
 
 /** Handles ADB shell command output */
-class AdbShellResponseHandler : com.android.ddmlib.IShellOutputReceiver {
+class AdbShellResponseHandler : IShellOutputReceiver {
     val output = StringBuilder()
 
     override fun addOutput(data: ByteArray, offset: Int, length: Int) {
