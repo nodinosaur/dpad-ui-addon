@@ -1,14 +1,17 @@
 package uk.co.androidalliance.dpad
 
 import com.intellij.openapi.diagnostic.Logger
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDownDark
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentOutlineDark
-import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUpDark
+import com.intellij.util.ui.UIUtil
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentLabel
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentOutline
+import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUp
 import uk.co.androidalliance.dpad.theme.Typography.dPadNavigation
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JPanel
+
 
 class DPadPanel(val dPadSize: Int = 120) : JPanel() {
     private val LOG = Logger.getInstance(DPadPanel::class.java)
@@ -80,13 +83,25 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
         return null
     }
 
+    //private fun getSegmentUpColor(): Color {
+    //    return if (isDarkTheme) SegmentUpDark else SegmentUpLight
+    //}
+//
+    //private fun getSegmentDownColor(): Color {
+    //    return if (isDarkTheme) SegmentDownDark else SegmentDownLight
+    //}
+//
+    //private fun getSegmentOutlineColor(): Color {
+    //    return if (isDarkTheme) SegmentOutlineDark else SegmentOutlineLight
+    //}
+
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
         val g2d = g as Graphics2D
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
         // Draw background to ensure the panel is visible
-        g2d.color = background
+        g2d.color = UIUtil.getPanelBackground()
         g2d.fillRect(0, 0, width, height)
 
         val width = width
@@ -133,28 +148,28 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
         segments[LEFT].addPoint(0, height)
         segments[LEFT].addPoint(0, 0)
 
-        // Draw segments with different colors based on active state
+        // Draw segments with different colors based on active state and theme
         for (i in segments.indices) {
-            g2d.color = if (i == activeSegment) SegmentDownDark else SegmentUpDark
+            g2d.color = if (i == activeSegment) SegmentDown else SegmentUp
             g2d.fill(segments[i]) // Draws the fill
-            g2d.color = SegmentOutlineDark
+            g2d.color = SegmentOutline
             g2d.draw(segments[i]) // Draws the outline
         }
 
         // Draw center square
-        g2d.color = if (activeSegment == CENTER) SegmentDownDark else SegmentUpDark
+        g2d.color = if (activeSegment == CENTER) SegmentDown else SegmentUp
         g2d.fill(centerSquare) // Draws the fill
-        g2d.color = SegmentOutlineDark
+        g2d.color = SegmentOutline
         g2d.draw(centerSquare) // Draws the outline
 
-        // Optional: Add direction labels
-        g2d.color = SegmentOutlineDark
+        // Optional: Add direction labels with appropriate color for theme
+        g2d.color = SegmentLabel
         g2d.font = dPadNavigation
         g2d.drawString("↑", centerX - 5, centerY - squareSize)
         g2d.drawString("→", centerX + squareSize, centerY + 5)
         g2d.drawString("↓", centerX - 5, centerY + squareSize + 15)
         g2d.drawString("←", centerX - squareSize - 10, centerY + 5)
-        g2d.drawString("", centerX - 8, centerY + 4) // Add "OK" text to center
+        g2d.drawString("OK", centerX - 8, centerY + 4) // Add "OK" text to center
     }
 
     companion object {

@@ -15,6 +15,16 @@ object NotificationHelper {
         )
     }
 
+    fun warn(message: String) {
+        sendNotification(
+            message,
+            NotificationType.WARNING,
+            NotificationGroupManager
+                .getInstance()
+                .getNotificationGroup("Dpad (Logging)")
+        )
+    }
+
     // Function to send an error notification
     fun error(message: String) {
         sendNotification(
