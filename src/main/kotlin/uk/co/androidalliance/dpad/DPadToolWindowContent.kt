@@ -27,7 +27,6 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 /** Main panel containing the D-pad and additional control buttons */
-/** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
 
     private val LOG = Logger.getInstance(DPadToolWindowContent::class.java)
@@ -45,13 +44,11 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         controlsPanel = JBPanel<Nothing>(FlowLayout(FlowLayout.CENTER, JBUIScale.scale(10), 0))
         controlsPanel.border = JBUI.Borders.empty(5)
 
-        // Column with buttons
         lhButtonColumn = JBPanel(GridLayout(3, 1, 0, JBUIScale.scale(5)))
         lhButtonColumn.add(createIconButton("/icons/outline/settings_24dp", "Settings", KEYCODE_SETTINGS))
         lhButtonColumn.add(createIconButton("/icons/fill/home_24dp", "Home", KEYCODE_HOME))
         lhButtonColumn.add(createIconButton("/icons/fill/arrow_back_24dp.svg", "Back", KEYCODE_BACK))
 
-        // D-pad panel
         dPadPanel = DPadPanel(dPadSize = JBUIScale.scale(120))
 
         rhButtonColumn = JBPanel(GridLayout(3, 1, 0, JBUIScale.scale(5)))
@@ -59,7 +56,6 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         rhButtonColumn.add(createIconButton("/icons/fill/person_24dp.svg", "Accounts", KEYCODE_CONTACTS))
         rhButtonColumn.add(createIconButton("/icons/outline/live_tv_24dp.svg", "Live TV", KEYCODE_TV))
 
-        // Set D-pad direction click callback
         dPadPanel.setOnDirectionClickListener { direction ->
             val directionName = when (direction) {
                 DPadPanel.UP -> "UP"
@@ -71,7 +67,6 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
             }
             LOG.info("D-pad direction clicked: $directionName")
 
-            // Example of performing an action based on direction
             when (direction) {
                 DPadPanel.UP -> sendAdbKeyEvent(KEYCODE_DPAD_UP)
                 DPadPanel.RIGHT -> sendAdbKeyEvent(KEYCODE_DPAD_RIGHT)
@@ -81,13 +76,11 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
             }
         }
 
-        // Add components to the grouping panel
         controlsPanel.add(lhButtonColumn)
         controlsPanel.add(dPadPanel)
         controlsPanel.add(rhButtonColumn)
 
         add(controlsPanel)
-
     }
 
 
@@ -125,5 +118,4 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     private fun sendAdbKeyEvent(keyCode: Int) {
         ShellCommandsFactory.sendAdbKeyEvent(project, keyCode)
     }
-
 }

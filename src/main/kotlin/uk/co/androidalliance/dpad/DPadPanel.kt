@@ -1,6 +1,5 @@
 package uk.co.androidalliance.dpad
 
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.ui.UIUtil
 import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
 import uk.co.androidalliance.dpad.theme.DpadColors.SegmentLabel
@@ -14,7 +13,7 @@ import javax.swing.JPanel
 
 
 class DPadPanel(val dPadSize: Int = 120) : JPanel() {
-    private val LOG = Logger.getInstance(DPadPanel::class.java)
+    //private val LOG = Logger.getInstance(DPadPanel::class.java)
 
     private val segments = arrayOf(
         Polygon(), // Up
@@ -22,7 +21,6 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
         Polygon(), // Down
         Polygon()  // Left
     )
-
     // Store center square separately
     private var centerSquare = Rectangle()
 
@@ -82,18 +80,6 @@ class DPadPanel(val dPadSize: Int = 120) : JPanel() {
         }
         return null
     }
-
-    //private fun getSegmentUpColor(): Color {
-    //    return if (isDarkTheme) SegmentUpDark else SegmentUpLight
-    //}
-//
-    //private fun getSegmentDownColor(): Color {
-    //    return if (isDarkTheme) SegmentDownDark else SegmentDownLight
-    //}
-//
-    //private fun getSegmentOutlineColor(): Color {
-    //    return if (isDarkTheme) SegmentOutlineDark else SegmentOutlineLight
-    //}
 
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)

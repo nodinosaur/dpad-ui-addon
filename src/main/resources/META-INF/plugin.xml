@@ -12,7 +12,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Notification group for logging -->
-        <notificationGroup displayType="BALLOON" id="Dpad (Logging)" isLogByDefault="true" />
+        <notificationGroup displayType="NONE" id="Dpad (Logging)" isLogByDefault="true" />
 
         <!-- Notification group for errors -->
         <notificationGroup displayType="BALLOON" id="Dpad (Errors)" isLogByDefault="true" />
