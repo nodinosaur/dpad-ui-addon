@@ -1,7 +1,8 @@
 # dpad-ui-addon
 Directional Pad (DPad) UI addon for Android Studio
 
-![DPad example](website/example_01.jpg)
+![DPad example](website/ide_dark.png)
+![DPad example](website/ide_light.png)
 
 ### Build Using IntelliJ IDEA:
 

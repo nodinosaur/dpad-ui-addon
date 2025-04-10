@@ -31,14 +31,32 @@ intellijPlatform {
     projectName = project.name
     autoReload = true
     pluginConfiguration {
-        /*ideaVersion {
-           sinceBuild = "243"
-           untilBuild = "251.*"
-        }*/
         //name = "dpad_ui_addon"
         //group = "co.uk.androidalliance.intellij.plugin.dpad"
-        ideaVersion.sinceBuild = project.property("sinceBuild").toString()
-        ideaVersion.untilBuild = provider { null }
+        name = providers.gradleProperty("pluginName")
+        version = providers.gradleProperty("pluginVersion")
+
+        ideaVersion {
+            sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            untilBuild = providers.gradleProperty("pluginUntilBuild")
+        }
+    }
+    /*
+    signing {
+        certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
+        privateKey = providers.environmentVariable("PRIVATE_KEY")
+        password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
+    }
+    */
+
+    publishing {
+        token = providers.environmentVariable("PUBLISH_TOKEN")
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
+        }
     }
 }
 
