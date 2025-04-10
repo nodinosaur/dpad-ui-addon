@@ -21,6 +21,7 @@ import uk.co.androidalliance.dpad.adb.KeyCodes.KEYCODE_DPAD_UP
 import uk.co.androidalliance.dpad.adb.KeyCodes.KEYCODE_HOME
 import uk.co.androidalliance.dpad.adb.ShellCommandsFactory
 import uk.co.androidalliance.dpad.theme.Typography.controlButtons
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.GridLayout
@@ -30,147 +31,189 @@ import javax.swing.JPanel
 /** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
 
-    private val LOG = Logger.getInstance(DPadToolWindowContent::class.java)
+    private companion object {
+        val LOG = Logger.getInstance(DPadToolWindowContent::class.java)
 
-    // UI components that need to be updated when theme changes
-    private var lhButtonColumn: JBPanel<JBPanel<*>>
-    private var rhButtonColumn: JBPanel<JBPanel<*>>
-    private var dPadPanel: DPadPanel
-    private var controlsPanel: JPanel
+        // Layout Constants
+        val GRID_LAYOUT_V_GAP: Int = JBUIScale.scale(5)
+        val CONTROLS_PANEL_H_GAP: Int = JBUIScale.scale(10)
+        val CONTROLS_PANEL_BORDER = JBUI.Borders.empty(5)
+        val BUTTON_SIZE = Dimension(JBUIScale.scale(40), JBUIScale.scale(40))
+        val DPAD_SIZE = JBUIScale.scale(120)
+
+        // Icon Paths
+        const val ICON_SETTINGS = "/icons/outline/settings_24dp.svg"
+        const val ICON_HOME = "/icons/fill/home_24dp.svg"
+        const val ICON_BACK = "/icons/fill/arrow_back_24dp.svg"
+        const val ICON_BOOKMARK = "/icons/outline/bookmark_24dp.svg"
+        const val ICON_PERSON = "/icons/fill/person_24dp.svg"
+        const val ICON_LIVE_TV = "/icons/outline/live_tv_24dp.svg"
+
+        // D-Pad Mapping
+        val DPAD_KEYCODE_MAP = mapOf(
+            DPadPanel.UP to KEYCODE_DPAD_UP,
+            DPadPanel.RIGHT to KEYCODE_DPAD_RIGHT,
+            DPadPanel.DOWN to KEYCODE_DPAD_DOWN,
+            DPadPanel.LEFT to KEYCODE_DPAD_LEFT,
+            DPadPanel.CENTER to KEYCODE_DPAD_CENTER
+        )
+
+        val DPAD_DIRECTION_NAME_MAP = mapOf(
+            DPadPanel.UP to "UP",
+            DPadPanel.RIGHT to "RIGHT",
+            DPadPanel.DOWN to "DOWN",
+            DPadPanel.LEFT to "LEFT",
+            DPadPanel.CENTER to "CENTER"
+        )
+    }
+
+    // --- Action Definition ---
+    /** Represents the action triggered by a button press. */
+    private sealed class ButtonAction {
+        data class SendKeyCode(val keyCode: Int) : ButtonAction()
+        data class StartActivity(val intent: Intent) : ButtonAction()
+    }
+
+    /** Data class to hold the configuration for creating an icon button. */
+    private data class ButtonConfig(
+        val iconPath: String,
+        val tooltipText: String,
+        val action: ButtonAction
+    )
+
+    // --- UI Components (initialized via helper functions) ---
+    private val lhButtonColumn: JPanel = createButtonColumnPanel(createLeftButtonConfigs())
+    private val rhButtonColumn: JPanel = createButtonColumnPanel(createRightButtonConfigs())
+    private val dPadPanel: DPadPanel = createDPadPanel()
+    private val controlsPanel: JPanel = createControlsPanel(lhButtonColumn, dPadPanel, rhButtonColumn)
 
     init {
         layout = FlowLayout(FlowLayout.CENTER, 0, 0)
+        add(controlsPanel)
+    }
 
-        // Create a panel for all controls
-        controlsPanel = JBPanel<Nothing>(FlowLayout(FlowLayout.CENTER, JBUIScale.scale(10), 0))
-        controlsPanel.border = JBUI.Borders.empty(5)
+    // --- UI Creation Helpers ---
 
-        lhButtonColumn = JBPanel(GridLayout(3, 1, 0, JBUIScale.scale(5)))
+    /** Creates the main panel holding the button columns and D-pad. */
+    private fun createControlsPanel(leftCol: Component, dPad: Component, rightCol: Component): JPanel {
+        return JBPanel<Nothing>(FlowLayout(FlowLayout.CENTER, CONTROLS_PANEL_H_GAP, 0)).apply {
+            border = CONTROLS_PANEL_BORDER
+            add(leftCol)
+            add(dPad)
+            add(rightCol)
+        }
+    }
+
+    /** Creates a panel containing a column of icon buttons based on the provided configurations. */
+    private fun createButtonColumnPanel(configs: List<ButtonConfig>): JPanel {
+        // Using JBPanel<JBPanel<*>> to match original type hint, though JBPanel<*> might suffice
+        return JBPanel<JBPanel<*>>(GridLayout(configs.size, 1, 0, GRID_LAYOUT_V_GAP)).apply {
+            configs.forEach { config ->
+                add(createIconButton(config))
+            }
+        }
+    }
+
+    /** Creates the DPadPanel and sets up its click listener. */
+    private fun createDPadPanel(): DPadPanel {
+        return DPadPanel(dPadSize = DPAD_SIZE).apply {
+            setOnDirectionClickListener { direction ->
+                handleDPadClick(direction)
+            }
+        }
+    }
+
+    /** Creates a styled JButton with an icon and an associated action. */
+    private fun createIconButton(config: ButtonConfig): JButton {
+        val icon = IconLoader.getIcon(config.iconPath, DPadToolWindowContent::class.java)
+        return JButton(icon).apply {
+            background = JBColor.PanelBackground
+            toolTipText = config.tooltipText
+            isBorderPainted = false
+            isContentAreaFilled = false // Recommended for icon-only buttons
+            margin = JBUI.emptyInsets() // Remove default margin
+            preferredSize = BUTTON_SIZE
+            minimumSize = BUTTON_SIZE // Prevent shrinking
+            maximumSize = BUTTON_SIZE // Prevent stretching
+
+            addActionListener { handleButtonAction(config.action) }
+        }
+    }
+
+    // --- Configuration Data ---
+
+    /** Returns the list of button configurations for the left column. */
+    private fun createLeftButtonConfigs(): List<ButtonConfig> {
         val settingsIntent = Intent(
             flags = FLAG_ACTIVITY_NEW_TASK,
             componentName = "com.android.tv.settings/.MainSettings",
         )
-        lhButtonColumn.add(
-            createIconButton(
-                iconPath = "/icons/outline/settings_24dp.svg",
-                tooltipText = "Settings",
-                keyCode = null /*KEYCODE_SETTINGS*/,
-                intent = settingsIntent
-            )
+        return listOf(
+            ButtonConfig(ICON_SETTINGS, "Settings", ButtonAction.StartActivity(settingsIntent)),
+            ButtonConfig(ICON_HOME, "Home", ButtonAction.SendKeyCode(KEYCODE_HOME)),
+            ButtonConfig(ICON_BACK, "Back", ButtonAction.SendKeyCode(KEYCODE_BACK))
         )
-        lhButtonColumn.add(
-            createIconButton(
-                iconPath = "/icons/fill/home_24dp.svg",
-                tooltipText = "Home",
-                keyCode = KEYCODE_HOME
-            )
-        )
-        lhButtonColumn.add(
-            createIconButton(
-                iconPath = "/icons/fill/arrow_back_24dp.svg",
-                tooltipText = "Back",
-                keyCode = KEYCODE_BACK
-            )
-        )
+    }
 
-        dPadPanel = DPadPanel(dPadSize = JBUIScale.scale(120))
-
-        rhButtonColumn = JBPanel(GridLayout(3, 1, 0, JBUIScale.scale(5)))
-        rhButtonColumn.add(
-            createIconButton(
-                iconPath = "/icons/outline/bookmark_24dp.svg",
-                tooltipText = "Bookmark",
-                keyCode = KEYCODE_BOOKMARK
-            )
-        )
-
+    /** Returns the list of button configurations for the right column. */
+    private fun createRightButtonConfigs(): List<ButtonConfig> {
         val accountsIntent = Intent(
             action = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL",
             flags = FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_REQUIRE_NON_BROWSER or FLAG_ACTIVITY_REQUIRE_DEFAULT
         )
-        rhButtonColumn.add(
-            createIconButton(
-                iconPath = "/icons/fill/person_24dp.svg",
-                tooltipText = "Accounts",
-                keyCode = null,
-                intent = accountsIntent
-            )
-        )
-
         val liveTvIntent = Intent(
             flags = FLAG_ACTIVITY_NEW_TASK,
             componentName = "com.android.tv/.MainActivity",
         )
-        rhButtonColumn.add(createIconButton("/icons/outline/live_tv_24dp.svg", "Live TV", null, liveTvIntent))
-
-        dPadPanel.setOnDirectionClickListener { direction ->
-            val directionName = when (direction) {
-                DPadPanel.UP -> "UP"
-                DPadPanel.RIGHT -> "RIGHT"
-                DPadPanel.DOWN -> "DOWN"
-                DPadPanel.LEFT -> "LEFT"
-                DPadPanel.CENTER -> "CENTER"
-                else -> "UNKNOWN"
-            }
-            LOG.info("D-pad direction clicked: $directionName")
-
-            when (direction) {
-                DPadPanel.UP -> sendAdbKeyEvent(KEYCODE_DPAD_UP)
-                DPadPanel.RIGHT -> sendAdbKeyEvent(KEYCODE_DPAD_RIGHT)
-                DPadPanel.DOWN -> sendAdbKeyEvent(KEYCODE_DPAD_DOWN)
-                DPadPanel.LEFT -> sendAdbKeyEvent(KEYCODE_DPAD_LEFT)
-                DPadPanel.CENTER -> sendAdbKeyEvent(KEYCODE_DPAD_CENTER)
-            }
-        }
-
-        controlsPanel.add(lhButtonColumn)
-        controlsPanel.add(dPadPanel)
-        controlsPanel.add(rhButtonColumn)
-
-        add(controlsPanel)
+        return listOf(
+            ButtonConfig(ICON_BOOKMARK, "Bookmark", ButtonAction.SendKeyCode(KEYCODE_BOOKMARK)),
+            ButtonConfig(ICON_PERSON, "Accounts", ButtonAction.StartActivity(accountsIntent)),
+            ButtonConfig(ICON_LIVE_TV, "Live TV", ButtonAction.StartActivity(liveTvIntent))
+        )
     }
 
+    // --- Action Handlers ---
 
-    /** Creates a text-based button with the specified label and key code */
-    private fun createLabelButton(text: String, keyCode: Int): JButton {
-        val button = JButton(text)
-        button.font = controlButtons
-        button.addActionListener {
+    /** Logs the D-pad click and sends the corresponding ADB key event. */
+    private fun handleDPadClick(direction: Int) {
+        val directionName = DPAD_DIRECTION_NAME_MAP.getOrDefault(direction, "UNKNOWN")
+        LOG.info("D-pad direction clicked: $directionName")
+
+        DPAD_KEYCODE_MAP[direction]?.let { keyCode ->
             sendAdbKeyEvent(keyCode)
+        } ?: LOG.warn("No keycode mapping found for D-pad direction: $direction")
+    }
+
+    /** Executes the appropriate action based on the ButtonAction type. */
+    private fun handleButtonAction(action: ButtonAction) {
+        when (action) {
+            is ButtonAction.SendKeyCode -> sendAdbKeyEvent(action.keyCode)
+            is ButtonAction.StartActivity -> startActivity(action.intent)
         }
-        return button
     }
 
-    private fun createIconButton(
-        iconPath: String, tooltipText: String,
-        keyCode: Int? = null,
-        intent: Intent? = null
-    ): JButton {
-        val icon = IconLoader.getIcon(iconPath, this::class.java)
-        val button = JButton(icon)
-        val size = JBUIScale.scale(40)
-        button.background = JBColor.PanelBackground
-        button.toolTipText = tooltipText
-        button.isBorderPainted = false
-        button.isContentAreaFilled = false
-        button.margin = JBUI.emptyInsets()
-        button.preferredSize = Dimension(size, size)
-        button.minimumSize = button.preferredSize
-        button.maximumSize = button.preferredSize
+    // --- ADB Command Wrappers ---
 
-        keyCode?.let { button.addActionListener { sendAdbKeyEvent(keyCode) } }
-        intent?.let { button.addActionListener { startActivity(intent) } }
-
-        return button
-    }
-
-    /** Sends an ADB key event to the connected device */
+    /** Sends an ADB key event to the connected device. */
     private fun sendAdbKeyEvent(keyCode: Int) {
+        LOG.debug("Sending ADB key event: $keyCode")
         ShellCommandsFactory.sendAdbKeyEvent(project, keyCode)
     }
 
+    /** Starts an Activity on the connected device using an Intent. */
     private fun startActivity(intent: Intent) {
+        LOG.debug("Starting Activity with Intent: $intent")
         ShellCommandsFactory.startActivity(project, intent)
     }
+
+    // Optional: Keep if needed for future use, otherwise remove.
+    /** Creates a text-based button with the specified label and key code */
+    private fun createLabelButton(text: String, keyCode: Int): JButton {
+        return JButton(text).apply {
+            font = controlButtons // Assuming 'controlButtons' is defined elsewhere
+            addActionListener { sendAdbKeyEvent(keyCode) }
+        }
+    }
+
 
 }
