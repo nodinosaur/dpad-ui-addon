@@ -18,7 +18,7 @@ object DpadColors {
         Color(50, 50, 50) // Dark
     )     // Light, Dark (Adjust as needed)
     val SegmentLabel = JBColor(
-        Color.BLACK, // Light
+        Color(150, 150, 150), // Light
         Color(187, 187, 187)// Dark
     )
 }

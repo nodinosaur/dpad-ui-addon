@@ -140,6 +140,14 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         }
     }
 
+    /** Creates a text-based button with the specified label and key code */
+    private fun createLabelButton(text: String, keyCode: Int): JButton {
+        return JButton(text).apply {
+            font = controlButtons // Assuming 'controlButtons' is defined elsewhere
+            addActionListener { sendAdbKeyEvent(keyCode) }
+        }
+    }
+
     // --- Configuration Data ---
 
     /** Returns the list of button configurations for the left column. */
@@ -205,15 +213,5 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         LOG.debug("Starting Activity with Intent: $intent")
         ShellCommandsFactory.startActivity(project, intent)
     }
-
-    // Optional: Keep if needed for future use, otherwise remove.
-    /** Creates a text-based button with the specified label and key code */
-    private fun createLabelButton(text: String, keyCode: Int): JButton {
-        return JButton(text).apply {
-            font = controlButtons // Assuming 'controlButtons' is defined elsewhere
-            addActionListener { sendAdbKeyEvent(keyCode) }
-        }
-    }
-
 
 }
