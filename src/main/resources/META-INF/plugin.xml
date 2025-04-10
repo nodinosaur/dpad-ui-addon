@@ -10,14 +10,17 @@
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://www.androidalliance.co.uk">George Medve (Android Alliance)</vendor>
 
+    <!-- Declare K2 compatibility -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode />
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <!-- Notification group for logging -->
         <notificationGroup displayType="NONE" id="Dpad (Logging)" isLogByDefault="true" />
-
         <!-- Notification group for errors -->
         <notificationGroup displayType="BALLOON" id="Dpad (Errors)" isLogByDefault="true" />
     </extensions>
-
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
@@ -33,12 +36,24 @@
         ]]>
     </description>
 
+    <change-notes>
+        <![CDATA[
+            <em>1.0.2</em>
+            <ul>
+                <li>Improved theme and scaling support for D-Pad component.</li>
+            </ul>
+            <em>1.0.1</em>
+            <ul>
+                <li>Initial release</li>
+            </ul>
+        ]]>
+    </change-notes>
+
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.kotlin</depends>
     <depends>org.jetbrains.android</depends>
-    <depends>com.intellij.modules.androidstudio</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->

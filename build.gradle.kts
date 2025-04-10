@@ -13,7 +13,8 @@ plugins {
 }
 
 group = "uk.co.androidalliance"
-version = "1.0.1-SNAPSHOT"
+//version = "1.0.2-SNAPSHOT"
+version = "1.0.2"
 
 repositories {
     google()

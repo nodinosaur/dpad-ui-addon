@@ -52,7 +52,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         )
         lhButtonColumn.add(
             createIconButton(
-                iconPath = "/icons/outline/settings_24dp",
+                iconPath = "/icons/outline/settings_24dp.svg",
                 tooltipText = "Settings",
                 keyCode = null /*KEYCODE_SETTINGS*/,
                 intent = settingsIntent
@@ -60,7 +60,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         )
         lhButtonColumn.add(
             createIconButton(
-                iconPath = "/icons/fill/home_24dp",
+                iconPath = "/icons/fill/home_24dp.svg",
                 tooltipText = "Home",
                 keyCode = KEYCODE_HOME
             )
@@ -148,7 +148,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     ): JButton {
         val icon = IconLoader.getIcon(iconPath, this::class.java)
         val button = JButton(icon)
-        val size = JBUIScale.scale(32)
+        val size = JBUIScale.scale(40)
         button.background = JBColor.PanelBackground
         button.toolTipText = tooltipText
         button.isBorderPainted = false
