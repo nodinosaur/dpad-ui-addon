@@ -21,7 +21,7 @@ import javax.swing.JPanel
 class DPadPanel(dPadSize: Int = 120) : JPanel() {
 
     // --- Constants ---
-    private companion object {
+    companion object {
         const val UP = 0
         const val RIGHT = 1
         const val DOWN = 2
