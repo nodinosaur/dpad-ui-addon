@@ -1,3 +1,7 @@
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.ChangelogSectionUrlBuilder
+import org.jetbrains.changelog.date
+
 plugins {
     id("java")
 
@@ -29,6 +33,21 @@ repositories {
     }
 }
 
+dependencies {
+    intellijPlatform {
+        bundledPlugins(
+            "org.jetbrains.kotlin",
+            "org.jetbrains.android",
+            "com.intellij.java",
+        )
+        if (project.hasProperty("localIdeOverride")) {
+            local(property("localIdeOverride").toString())
+        } else {
+            androidStudio(property("ideVersion").toString())
+        }
+    }
+}
+
 intellijPlatform {
     buildSearchableOptions = false
     instrumentCode = true
@@ -38,6 +57,18 @@ intellijPlatform {
         group = providers.gradleProperty("pluginGroup")
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
+
+        val changelog = project.changelog
+        changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
+            with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML,
+                )
+            }
+        }
 
         ideaVersion {
             sinceBuild = providers.gradleProperty("pluginSinceBuild")
@@ -62,32 +93,17 @@ intellijPlatform {
     }
 }
 
+changelog {
+    header.set(provider { "[${version.get()}] - ${date()}" })
+    version.set(project.version.toString())
+    groups.empty()
+    keepUnreleasedSection.set(false)
+    itemPrefix.set("-")
+    repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
+}
+
 configurations.all {
     exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
-}
-
-dependencies {
-
-    intellijPlatform {
-        bundledPlugins(
-            "org.jetbrains.kotlin",
-            "org.jetbrains.android",
-            "com.intellij.java",
-        )
-        //androidStudio("2024.3.1.14")
-        if (project.hasProperty("localIdeOverride")) {
-            local(property("localIdeOverride").toString())
-        } else {
-            androidStudio(property("ideVersion").toString())
-        }
-    }
-
-
-}
-
-changelog {
-    groups.empty()
-    repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
