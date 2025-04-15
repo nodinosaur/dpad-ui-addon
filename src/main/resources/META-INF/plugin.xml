@@ -12,14 +12,14 @@
 
     <!-- Declare K2 compatibility -->
     <extensions defaultExtensionNs="org.jetbrains.kotlin">
-        <supportsKotlinPluginMode />
+        <supportsKotlinPluginMode/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Notification group for logging -->
-        <notificationGroup displayType="NONE" id="Dpad (Logging)" isLogByDefault="true" />
+        <notificationGroup displayType="NONE" id="Dpad (Logging)" isLogByDefault="true"/>
         <!-- Notification group for errors -->
-        <notificationGroup displayType="BALLOON" id="Dpad (Errors)" isLogByDefault="true" />
+        <notificationGroup displayType="BALLOON" id="Dpad (Errors)" isLogByDefault="true"/>
     </extensions>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
@@ -35,19 +35,6 @@
         </ul>
         ]]>
     </description>
-
-    <change-notes>
-        <![CDATA[
-            <em>1.0.2</em>
-            <ul>
-                <li>Improved theme and scaling support for D-Pad component.</li>
-            </ul>
-            <em>1.0.1</em>
-            <ul>
-                <li>Initial release</li>
-            </ul>
-        ]]>
-    </change-notes>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

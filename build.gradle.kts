@@ -10,11 +10,15 @@ plugins {
     // https://plugins.gradle.org/plugin/org.jetbrains.intellij.platform
     // https://github.com/JetBrains/gradle-intellij-plugin/releases
     id("org.jetbrains.intellij.platform") version "2.5.0"
-}
 
-group = "uk.co.androidalliance"
-//version = "1.0.2-SNAPSHOT"
-version = "1.0.2"
+    id ("org.jetbrains.changelog") version "2.2.1"
+}
+group = project.providers.gradleProperty("pluginGroup").get()
+version = project.providers.gradleProperty("pluginVersion").get()
+
+kotlin {
+    jvmToolchain(21)
+}
 
 repositories {
     google()
@@ -31,8 +35,7 @@ intellijPlatform {
     projectName = project.name
     autoReload = true
     pluginConfiguration {
-        //name = "dpad_ui_addon"
-        //group = "co.uk.androidalliance.intellij.plugin.dpad"
+        group = providers.gradleProperty("pluginGroup")
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
 
@@ -41,13 +44,12 @@ intellijPlatform {
             untilBuild = providers.gradleProperty("pluginUntilBuild")
         }
     }
-    /*
+
     signing {
-        certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
-        privateKey = providers.environmentVariable("PRIVATE_KEY")
+        certificateChainFile = file("./keystore/chain.crt")
+        privateKeyFile = file("./keystore/private.pem")
         password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
     }
-    */
 
     publishing {
         token = providers.environmentVariable("PUBLISH_TOKEN")
@@ -58,10 +60,6 @@ intellijPlatform {
             recommended()
         }
     }
-}
-
-kotlin {
-    jvmToolchain(21)
 }
 
 configurations.all {
@@ -85,6 +83,11 @@ dependencies {
     }
 
 
+}
+
+changelog {
+    groups.empty()
+    repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
