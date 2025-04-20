@@ -36,6 +36,11 @@ class DPadPanel(dPadSize: Int = 120) : JPanel() {
         private const val LABEL_CENTER = "OK"
     }
 
+    sealed interface DpadAction{
+        data object ActionUp: DpadAction
+        data object ActionDown: DpadAction
+    }
+
     // private val LOG = Logger.getInstance(DPadPanel::class.java) // Uncomment if needed
 
     // --- State ---
