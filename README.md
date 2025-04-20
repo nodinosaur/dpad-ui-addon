@@ -23,7 +23,17 @@ Directional Pad (DPad) UI addon for Android Studio
 
 - [x] initial proof of concept
 - [ ] work on layout and maybe use graphics?
-- [ ] create a better icon
+- [x] create a better icon
+- [x] Dpad keycode mapping from [Keyboard devices](https://source.android.com/devices/input/keyboard-devices)
+
+### References:
+- `idea/streaming/screen-sharing-agent/app/src/main/cpp/virtual_input_device.cc`
+- `idea/streaming/screen-sharing-agent/app/src/main/cpp/virtual_input_device.cc`
+- `idea/streaming/src/com/android/tools/idea/streaming/device/AndroidKeyCodes.kt`
+- `idea/streaming/src/com/android/tools/idea/streaming/device/DeviceView.kt`
+- `qemu/distrib.sdl2-2.0.3/src/joysick/android/SDL_sysjoystick.c`
+- `qemu/distrib.sdl2-2.0.3/src/video/android/SDL_androidkeyboard.c`
+
 
 ### Features: 
 
