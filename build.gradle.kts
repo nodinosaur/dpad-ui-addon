@@ -1,6 +1,6 @@
 import org.jetbrains.changelog.Changelog
-import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.changelog.date
+import java.util.*
 
 plugins {
     id("java")
@@ -15,7 +15,7 @@ plugins {
     // https://github.com/JetBrains/gradle-intellij-plugin/releases
     id("org.jetbrains.intellij.platform") version "2.5.0"
 
-    id ("org.jetbrains.changelog") version "2.2.1"
+    id("org.jetbrains.changelog") version "2.2.1"
 }
 group = project.providers.gradleProperty("pluginGroup").get()
 version = project.providers.gradleProperty("pluginVersion").get()
@@ -83,8 +83,45 @@ intellijPlatform {
     }
 
     publishing {
-        token = providers.environmentVariable("PUBLISH_TOKEN")
-    }
+        token = providers.provider {
+            val securePropsFile = rootProject.file("./keystore/publish.properties")
+            var foundToken: String? = null
+
+            if (securePropsFile.exists() && securePropsFile.isFile) {
+                try {
+                    val properties = Properties()
+                    securePropsFile.inputStream().use { properties.load(it) }
+                    foundToken = properties.getProperty("publish.token")
+                    if (!foundToken.isNullOrBlank()) {
+                        project.logger.lifecycle("Using publish token from ${securePropsFile.name}")
+                    } else {
+                        foundToken = null
+                    }
+                } catch (e: Exception) {
+                    project.logger.warn("Could not read publish token from ${securePropsFile.absolutePath}: ${e.message}")
+                }
+            }
+
+            if (foundToken == null) {
+                foundToken = providers.environmentVariable("PUBLISH_TOKEN").orNull
+                if (!foundToken.isNullOrBlank()) {
+                    project.logger.lifecycle("Using publish token from environment variable PUBLISH_TOKEN")
+                } else {
+                    foundToken = null
+                }
+            }
+
+            // If still not found after checking both, fail the build configuration
+            // Or return null if the token is optional for some tasks (publishing task will likely fail later if null)
+            foundToken ?: error(
+                """
+                    Publish token not found in ${securePropsFile.name} (key 'publish.token') or environment variable 'PUBLISH_TOKEN'. 
+                    See build script for details.
+                """.trimIndent()
+            )
+
+        } // End provider lambda
+    } // End publishing block
 
     pluginVerification {
         ides {
