@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## [Unreleased]
+## [1.2.0] - 2025-04-21
+
+### Added
+
+- Long-press functionality
 
 ## [1.1.1] - 2025-04-15
 
@@ -14,13 +18,15 @@
 
 ### Added
 
-- Preparation and teaks for initial release 
+- Preparation and teaks for initial release
 
 ## [0.0.1] - 2025-04-06
+
 ### Added
 
 - Initial scaffold created from IntelliJ Platform Plugin Template
 
-[Unreleased]: https://github.com/nodinosaur/dpad-ui-addon/compare/v1.1.1...HEAD
-[1.1.1]: https://github.com/nodinosaur/dpad-ui-addon/compare/v1.0.0...v1.1.1
-[1.0.0]: https://github.com/nodinosaur/dpad-ui-addon/commits/v1.0.0
+[1.2.0]: https://github.com/nodinosaur/dpad-ui-addon/compare/v1.0.0...v1.2.0
+[1.1.1]: https://github.com/nodinosaur/dpad-ui-addon/compare/v1.2.0...v1.1.1
+[1.0.0]: https://github.com/nodinosaur/dpad-ui-addon/compare/v0.0.1...v1.0.0
+[0.0.1]: https://github.com/nodinosaur/dpad-ui-addon/commits/v0.0.1
