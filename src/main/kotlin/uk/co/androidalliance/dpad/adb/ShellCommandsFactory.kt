@@ -4,6 +4,8 @@ import com.android.ddmlib.IDevice
 import com.android.tools.idea.adb.AdbService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import uk.co.androidalliance.dpad.DPadPanel
+import uk.co.androidalliance.dpad.DPadPanel.DpadAction.*
 import uk.co.androidalliance.dpad.notify.NotificationHelper
 import java.util.concurrent.TimeUnit
 
@@ -48,7 +50,7 @@ object ShellCommandsFactory {
 
     /** Sends an ADB key event to the connected device */
     @JvmStatic
-    fun sendAdbKeyEvent(project: Project, keyCode: Int) {
+    fun sendAdbKeyEvent(project: Project, keyCode: Int, action: DPadPanel.DpadAction) {
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 val adbFuture = AdbService.getInstance().getDebugBridge(project)
@@ -64,7 +66,12 @@ object ShellCommandsFactory {
                 }
                 val device: IDevice = devices[0] // Simple: Use first device
                 NotificationHelper.info("Sending key event $keyCode to device ${device.serialNumber}")
-                device.executeShellCommand("input keyevent $keyCode", AdbShellResponseHandler())
+                val keyAction = when (action) {
+                    ActionDown -> ""
+                    ActionUp -> ""
+                    ActionLongPress -> "--longpress"
+                }
+                device.executeShellCommand("input keyevent $keyAction $keyCode", AdbShellResponseHandler())
             } catch (e: Exception) {
                 NotificationHelper.error(
                     String.format(

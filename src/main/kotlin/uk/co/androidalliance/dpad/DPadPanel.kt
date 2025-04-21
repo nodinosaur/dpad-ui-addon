@@ -1,15 +1,18 @@
 package uk.co.androidalliance.dpad
 
+import uk.co.androidalliance.dpad.DPadPanel.DpadAction.*
 import uk.co.androidalliance.dpad.theme.DpadColors.SegmentDown
 import uk.co.androidalliance.dpad.theme.DpadColors.SegmentLabel
 import uk.co.androidalliance.dpad.theme.DpadColors.SegmentOutline
 import uk.co.androidalliance.dpad.theme.DpadColors.SegmentUp
 import uk.co.androidalliance.dpad.theme.Typography.dPadNavigation
 import java.awt.*
+import java.awt.event.ActionListener
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.geom.Rectangle2D
 import javax.swing.JPanel
+import javax.swing.Timer
 
 
 /**
@@ -18,7 +21,10 @@ import javax.swing.JPanel
  *
  * @param dPadSize The preferred initial size (width and height) for the D-pad.
  */
-class DPadPanel(dPadSize: Int = 120) : JPanel() {
+class DPadPanel(
+    dPadSize: Int = 120,
+    private val longPressDelayMs: Int = 500
+) : JPanel() {
 
     // --- Constants ---
     companion object {
@@ -36,9 +42,11 @@ class DPadPanel(dPadSize: Int = 120) : JPanel() {
         private const val LABEL_CENTER = "OK"
     }
 
-    sealed interface DpadAction{
-        data object ActionUp: DpadAction
-        data object ActionDown: DpadAction
+    // --- Action Definition ---
+    sealed interface DpadAction {
+        data object ActionUp : DpadAction
+        data object ActionDown : DpadAction
+        data object ActionLongPress : DpadAction
     }
 
     // private val LOG = Logger.getInstance(DPadPanel::class.java) // Uncomment if needed
@@ -46,13 +54,18 @@ class DPadPanel(dPadSize: Int = 120) : JPanel() {
     // --- State ---
     private var activeSegment: Int? = null // Which segment is currently pressed (UP, DOWN, etc.)
     private var hoverSegment: Int? = null // Which segment is the mouse currently over
-    private var clickHandler: ((Int) -> Unit)? = null // Callback for clicks
+    private var clickHandler: ((Int, DpadAction) -> Unit)? = null // Callback for clicks
 
     // --- Shape Cache ---
     // Store calculated shapes to avoid recalculation on every paint
     private val directionalShapes = mutableMapOf<Int, Shape>()
     private var centerShape: Shape = Rectangle2D.Double() // Default empty shape
     private var lastBounds: Rectangle? = null // To detect size changes
+
+    // --- Long Press State ---
+    private var longPressTimer: Timer? = null
+    private var longPressSegment: Int? = null // Track segment for timer
+    private var longPressFired: Boolean = false // Prevent multiple long presses per hold
 
     init {
         preferredSize = Dimension(dPadSize, dPadSize)
@@ -65,12 +78,11 @@ class DPadPanel(dPadSize: Int = 120) : JPanel() {
      * Sets the callback function to be invoked when a D-pad direction or center is clicked.
      * @param handler Lambda function receiving the direction constant (UP, RIGHT, DOWN, LEFT, CENTER).
      */
-    fun setOnDirectionClickListener(handler: (Int) -> Unit) {
+    fun setOnDirectionClickListener(handler: (Int, DpadAction) -> Unit) {
         clickHandler = handler
     }
 
     // --- Core Painting Logic ---
-
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g) // Let the superclass paint (e.g., background)
 
@@ -228,17 +240,24 @@ class DPadPanel(dPadSize: Int = 120) : JPanel() {
                 val segment = getSegmentAt(e.point)
                 if (segment != null) {
                     activeSegment = segment
-                    clickHandler?.invoke(segment) // Invoke callback immediately
+                    //clickHandler?.invoke(segment, ActionDown) // Invoke ActionDown immediately
+                    startLongPressTimer(segment) // Start timer for potential long press
                     repaint()
                 }
             }
 
             override fun mouseReleased(e: MouseEvent) {
-                if (activeSegment != null) {
+                stopLongPressTimer() // Always stop timer on release
+
+                activeSegment?.let { segment ->
+                    // Only trigger ActionUp if a long press hasn't already been fired for this press
+                    if (!longPressFired) {
+                        clickHandler?.invoke(segment, ActionUp)
+                    }
                     activeSegment = null
                     repaint()
                 }
-                // Update hover state in case mouse is still over a segment
+                // Update hover state regardless
                 updateHover(e.point)
             }
 
@@ -247,26 +266,61 @@ class DPadPanel(dPadSize: Int = 120) : JPanel() {
             }
 
             override fun mouseDragged(e: MouseEvent) {
-                // Treat drag like move for hover effects, but don't trigger clicks
                 updateHover(e.point)
-                // If dragging outside the active segment, potentially deactivate it
-                if (activeSegment != null && getSegmentAt(e.point) != activeSegment) {
+                // If dragging outside the active segment, cancel the press and timer
+                val currentSegment = getSegmentAt(e.point)
+                if (activeSegment != null && currentSegment != activeSegment) {
+                    stopLongPressTimer() // Stop timer if dragged off
                     activeSegment = null
                     repaint()
                 }
             }
 
             override fun mouseExited(e: MouseEvent) {
+                stopLongPressTimer() // Stop timer if mouse leaves the panel
                 if (hoverSegment != null || activeSegment != null) {
                     cursor = Cursor.getDefaultCursor()
                     hoverSegment = null
-                    activeSegment = null // Deactivate if mouse leaves panel while pressed
+                    activeSegment = null
                     repaint()
                 }
             }
         }
         addMouseListener(mouseAdapter)
         addMouseMotionListener(mouseAdapter)
+    }
+
+    /** Starts the timer to detect a long press on the given segment. */
+    private fun startLongPressTimer(segment: Int) {
+        stopLongPressTimer() // Stop any existing timer first
+        longPressSegment = segment
+        longPressFired = false // Reset fired flag for this new press
+
+        // Create the ActionListener for the timer
+        val timerAction = ActionListener {
+            // Timer fired - check if the press is still active on the same segment
+            if (activeSegment == longPressSegment && !longPressFired) {
+                longPressFired = true // Mark long press as fired for this hold
+                clickHandler?.invoke(segment, ActionLongPress) // Trigger long press action
+                // Optionally: Add visual feedback for long press if needed (e.g., slight color change)
+                // repaint()
+            }
+            // Timer automatically stops because isRepeats is false
+        }
+
+        // Create and start a non-repeating timer
+        longPressTimer = Timer(longPressDelayMs, timerAction).apply {
+            isRepeats = false // Only fire once
+            start()
+        }
+    }
+
+    /** Stops and nullifies the long press timer if it's running. */
+    private fun stopLongPressTimer() {
+        longPressTimer?.stop()
+        longPressTimer = null
+        longPressSegment = null
+        // Do not reset longPressFired here, it's reset on the next mousePressed
     }
 
     /** Updates the hover state and cursor based on the mouse position. */
