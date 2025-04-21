@@ -7,6 +7,9 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.scale.JBUIScale
 import com.intellij.util.ui.JBUI
+import uk.co.androidalliance.dpad.DPadPanel.DpadAction
+import uk.co.androidalliance.dpad.DPadPanel.DpadAction.ActionDown
+import uk.co.androidalliance.dpad.DPadPanel.DpadAction.ActionUp
 import uk.co.androidalliance.dpad.adb.Intent
 import uk.co.androidalliance.dpad.adb.Intent.Companion.FLAG_ACTIVITY_NEW_TASK
 import uk.co.androidalliance.dpad.adb.Intent.Companion.FLAG_ACTIVITY_REQUIRE_DEFAULT
@@ -117,8 +120,8 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     /** Creates the DPadPanel and sets up its click listener. */
     private fun createDPadPanel(): DPadPanel {
         return DPadPanel(dPadSize = DPAD_SIZE).apply {
-            setOnDirectionClickListener { direction ->
-                handleDPadClick(direction)
+            setOnDirectionClickListener { direction, action ->
+                handleDPadClick(direction, action)
             }
         }
     }
@@ -141,10 +144,10 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     }
 
     /** Creates a text-based button with the specified label and key code */
-    private fun createLabelButton(text: String, keyCode: Int): JButton {
+    private fun createLabelButton(text: String, keyCode: Int, action: DpadAction): JButton {
         return JButton(text).apply {
             font = controlButtons // Assuming 'controlButtons' is defined elsewhere
-            addActionListener { sendAdbKeyEvent(keyCode) }
+            addActionListener { sendAdbKeyEvent(keyCode, action) }
         }
     }
 
@@ -183,19 +186,19 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     // --- Action Handlers ---
 
     /** Logs the D-pad click and sends the corresponding ADB key event. */
-    private fun handleDPadClick(direction: Int) {
+    private fun handleDPadClick(direction: Int, action: DpadAction) {
         val directionName = DPAD_DIRECTION_NAME_MAP.getOrDefault(direction, "UNKNOWN")
         LOG.info("D-pad direction clicked: $directionName")
 
         DPAD_KEYCODE_MAP[direction]?.let { keyCode ->
-            sendAdbKeyEvent(keyCode)
+            sendAdbKeyEvent(keyCode, action)
         } ?: LOG.warn("No keycode mapping found for D-pad direction: $direction")
     }
 
     /** Executes the appropriate action based on the ButtonAction type. */
     private fun handleButtonAction(action: ButtonAction) {
         when (action) {
-            is ButtonAction.SendKeyCode -> sendAdbKeyEvent(action.keyCode)
+            is ButtonAction.SendKeyCode -> sendAdbKeyEvent(action.keyCode, ActionUp)
             is ButtonAction.StartActivity -> startActivity(action.intent)
         }
     }
@@ -203,9 +206,9 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     // --- ADB Command Wrappers ---
 
     /** Sends an ADB key event to the connected device. */
-    private fun sendAdbKeyEvent(keyCode: Int) {
+    private fun sendAdbKeyEvent(keyCode: Int, action: DpadAction) {
         LOG.debug("Sending ADB key event: $keyCode")
-        ShellCommandsFactory.sendAdbKeyEvent(project, keyCode)
+        ShellCommandsFactory.sendAdbKeyEvent(project, keyCode, action)
     }
 
     /** Starts an Activity on the connected device using an Intent. */
