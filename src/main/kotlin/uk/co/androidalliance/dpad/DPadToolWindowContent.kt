@@ -188,7 +188,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     /** Logs the D-pad click and sends the corresponding ADB key event. */
     private fun handleDPadClick(direction: Int, action: DpadAction) {
         val directionName = DPAD_DIRECTION_NAME_MAP.getOrDefault(direction, "UNKNOWN")
-        LOG.info("D-pad direction clicked: $directionName")
+        LOG.info("D-pad direction clicked: $directionName & $action")
 
         DPAD_KEYCODE_MAP[direction]?.let { keyCode ->
             sendAdbKeyEvent(keyCode, action)
