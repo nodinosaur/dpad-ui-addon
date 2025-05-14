@@ -240,7 +240,8 @@ class DPadPanel(
                 val segment = getSegmentAt(e.point)
                 if (segment != null) {
                     activeSegment = segment
-                    //clickHandler?.invoke(segment, ActionDown) // Invoke ActionDown immediately
+                    // Enabling this is causing skipping across buttons
+                    // clickHandler?.invoke(segment, ActionDown)
                     startLongPressTimer(segment) // Start timer for potential long press
                     repaint()
                 }

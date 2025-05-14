@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [1.3.0] - 2025-04-21
+
+### Added
+
+- K2 support
+- Sending click states (Down/Up)
+
 ## [1.2.0] - 2025-04-21
 
 ### Added
