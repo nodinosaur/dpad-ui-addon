@@ -9,9 +9,11 @@ import uk.co.androidalliance.dpad.DPadPanel.DpadAction.*
 import uk.co.androidalliance.dpad.notify.NotificationHelper
 import java.util.concurrent.TimeUnit
 
+@Deprecated("Use DeviceInputRouter instead", ReplaceWith("DeviceInputRouter"))
 object ShellCommandsFactory {
 
     @JvmStatic
+    @Deprecated("Use DeviceInputRouter.startActivity() instead")
     fun startActivity(project: Project, intent: Intent) {
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
@@ -50,6 +52,7 @@ object ShellCommandsFactory {
 
     /** Sends an ADB key event to the connected device */
     @JvmStatic
+    @Deprecated("Use DeviceInputRouter.sendKeyEvent() instead")
     fun sendAdbKeyEvent(project: Project, keyCode: Int, action: DPadPanel.DpadAction) {
         ApplicationManager.getApplication().executeOnPooledThread {
             try {

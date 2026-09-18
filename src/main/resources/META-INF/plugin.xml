@@ -10,11 +10,6 @@
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor url="https://www.androidalliance.co.uk">George Medve (Android Alliance)</vendor>
 
-    <extensions defaultExtensionNs="org.jetbrains.kotlin">
-        <!-- Declare K2 compatibility -->
-        <supportsKotlinPluginMode supportsK2="true" />
-    </extensions>
-
     <extensions defaultExtensionNs="com.intellij">
         <!-- Notification group for logging -->
         <notificationGroup displayType="NONE" id="Dpad (Logging)" isLogByDefault="true"/>
@@ -36,11 +31,27 @@
         ]]>
     </description>
 
+    <!-- Compatibility range.
+         `since-build` is the oldest supported IDE branch (2024.3 / 243).
+         `until-build` is intentionally omitted so the plugin remains installable on
+         current *and* future Android Studio / IntelliJ IDEA releases.
+         These values are patched at build time from `pluginSinceBuild` / `pluginUntilBuild`
+         in gradle.properties (see the `patchPluginXml` configuration in build.gradle.kts).
+         Read more: https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html -->
+    <idea-version since-build="243"/>
+
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
-    <depends>org.jetbrains.kotlin</depends>
+
+    <!-- Required: the plugin talks to devices/emulators through ddmlib + AdbService,
+         which are supplied by the Android plugin. Bundled in Android Studio and
+         installable in IntelliJ IDEA (Community & Ultimate). -->
     <depends>org.jetbrains.android</depends>
+
+    <!-- Optional: only used to advertise K2 compatibility. The plugin contains no
+         Kotlin PSI code, so it still loads in IDEs without the Kotlin plugin. -->
+    <depends optional="true" config-file="dpad-kotlin.xml">org.jetbrains.kotlin</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
