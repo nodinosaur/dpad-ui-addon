@@ -7,6 +7,12 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.scale.JBUIScale
 import com.intellij.util.ui.JBUI
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import uk.co.androidalliance.dpad.DPadPanel.DpadAction
 import uk.co.androidalliance.dpad.DPadPanel.DpadAction.ActionDown
 import uk.co.androidalliance.dpad.DPadPanel.DpadAction.ActionUp
@@ -22,7 +28,7 @@ import uk.co.androidalliance.dpad.adb.KeyCodes.KEYCODE_DPAD_LEFT
 import uk.co.androidalliance.dpad.adb.KeyCodes.KEYCODE_DPAD_RIGHT
 import uk.co.androidalliance.dpad.adb.KeyCodes.KEYCODE_DPAD_UP
 import uk.co.androidalliance.dpad.adb.KeyCodes.KEYCODE_HOME
-import uk.co.androidalliance.dpad.adb.ShellCommandsFactory
+import uk.co.androidalliance.dpad.input.DeviceInputRouter
 import uk.co.androidalliance.dpad.theme.Typography.controlButtons
 import java.awt.Component
 import java.awt.Dimension
@@ -33,6 +39,13 @@ import javax.swing.JPanel
 
 /** Main panel containing the D-pad and additional control buttons */
 class DPadToolWindowContent(private val project: Project) : JPanel() {
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        LOG.error("Coroutine failed: ${throwable.message}", throwable)
+        uk.co.androidalliance.dpad.notify.NotificationHelper.error("D-Pad error: ${throwable.message}")
+    }
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + exceptionHandler)
+    private val inputRouter = DeviceInputRouter(project)
 
     private companion object {
         val LOG = Logger.getInstance(DPadToolWindowContent::class.java)
@@ -93,6 +106,11 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     init {
         layout = FlowLayout(FlowLayout.CENTER, 0, 0)
         add(controlsPanel)
+
+        LOG.info("D-Pad UI Addon v2.0.0 loaded")
+        coroutineScope.launch {
+            inputRouter.logConnectionStatus()
+        }
     }
 
     // --- UI Creation Helpers ---
@@ -147,7 +165,7 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
     private fun createLabelButton(text: String, keyCode: Int, action: DpadAction): JButton {
         return JButton(text).apply {
             font = controlButtons // Assuming 'controlButtons' is defined elsewhere
-            addActionListener { sendAdbKeyEvent(keyCode, action) }
+            addActionListener { sendKeyEvent(keyCode, action) }
         }
     }
 
@@ -191,30 +209,39 @@ class DPadToolWindowContent(private val project: Project) : JPanel() {
         LOG.info("D-pad direction clicked: $directionName & $action")
 
         DPAD_KEYCODE_MAP[direction]?.let { keyCode ->
-            sendAdbKeyEvent(keyCode, action)
+            sendKeyEvent(keyCode, action)
         } ?: LOG.warn("No keycode mapping found for D-pad direction: $direction")
     }
 
     /** Executes the appropriate action based on the ButtonAction type. */
     private fun handleButtonAction(action: ButtonAction) {
         when (action) {
-            is ButtonAction.SendKeyCode -> sendAdbKeyEvent(action.keyCode, ActionUp)
+            is ButtonAction.SendKeyCode -> sendKeyEvent(action.keyCode, ActionUp)
             is ButtonAction.StartActivity -> startActivity(action.intent)
         }
     }
 
-    // --- ADB Command Wrappers ---
+    // --- Input Command Wrappers ---
 
-    /** Sends an ADB key event to the connected device. */
-    private fun sendAdbKeyEvent(keyCode: Int, action: DpadAction) {
-        LOG.debug("Sending ADB key event: $keyCode")
-        ShellCommandsFactory.sendAdbKeyEvent(project, keyCode, action)
+    /** Sends a key event to the connected device via gRPC (emulator) or ADB (physical). */
+    private fun sendKeyEvent(keyCode: Int, action: DpadAction) {
+        LOG.debug("Sending key event: $keyCode")
+        coroutineScope.launch {
+            inputRouter.sendKeyEvent(keyCode, action)
+        }
     }
 
     /** Starts an Activity on the connected device using an Intent. */
     private fun startActivity(intent: Intent) {
         LOG.debug("Starting Activity with Intent: $intent")
-        ShellCommandsFactory.startActivity(project, intent)
+        coroutineScope.launch {
+            inputRouter.startActivity(intent)
+        }
+    }
+
+    fun dispose() {
+        inputRouter.shutdown()
+        coroutineScope.cancel()
     }
 
 }

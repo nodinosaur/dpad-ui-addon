@@ -16,6 +16,8 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.5.0"
 
     id("org.jetbrains.changelog") version "2.2.1"
+
+    id("com.google.protobuf") version "0.9.4"
 }
 group = project.providers.gradleProperty("pluginGroup").get()
 version = project.providers.gradleProperty("pluginVersion").get()
@@ -46,6 +48,31 @@ dependencies {
             androidStudio(property("ideVersion").toString())
         }
     }
+
+    // gRPC + Protobuf
+    // Exclude Guava — IntelliJ Platform bundles its own; shipping a second copy causes
+    // classloader constraint violations for ListenableFuture at runtime.
+    implementation("io.grpc:grpc-protobuf:1.68.0") {
+        exclude(group = "com.google.guava")
+    }
+    implementation("io.grpc:grpc-stub:1.68.0") {
+        exclude(group = "com.google.guava")
+    }
+    implementation("io.grpc:grpc-kotlin-stub:1.4.1") {
+        exclude(group = "com.google.guava")
+    }
+    implementation("com.google.protobuf:protobuf-kotlin:3.25.5")
+    runtimeOnly("io.grpc:grpc-netty-shaded:1.68.0") {
+        exclude(group = "com.google.guava")
+    }
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+
+    // Test
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
+    testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }
 
 intellijPlatform {
@@ -72,7 +99,12 @@ intellijPlatform {
 
         ideaVersion {
             sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            // `pluginUntilBuild` may be left blank in gradle.properties to keep the plugin
+            // compatible with current *and* future IDE releases. A blank value results in
+            // no `until-build` attribute being written into plugin.xml.
             untilBuild = providers.gradleProperty("pluginUntilBuild")
+                .map(String::trim)
+                .filter(String::isNotEmpty)
         }
     }
 
@@ -139,8 +171,29 @@ changelog {
     repositoryUrl = providers.gradleProperty("pluginRepositoryUrl")
 }
 
-configurations.all {
-    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.5"
+    }
+    plugins {
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.68.0"
+        }
+        create("grpckt") {
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar"
+        }
+    }
+    generateProtoTasks {
+        all().forEach {
+            it.plugins {
+                create("grpc")
+                create("grpckt")
+            }
+            it.builtins {
+                create("kotlin")
+            }
+        }
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
@@ -149,5 +202,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 

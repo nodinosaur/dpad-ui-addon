@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package android.emulation.control;
+
+option java_package = "com.android.emulation.control";
+option java_outer_classname = "EmulatorControllerProto";
+
+import "google/protobuf/empty.proto";
+
+message KeyboardEvent {
+    enum KeyCodeType {
+        Usb = 0;
+        Evdev = 1;
+        XKB = 2;
+        Win = 3;
+        Mac = 4;
+    }
+
+    enum KeyEventType {
+        keydown = 0;
+        keyup = 1;
+        keypress = 2;
+    }
+
+    KeyCodeType codeType = 1;
+    KeyEventType eventType = 2;
+    int32 keyCode = 3;
+    string key = 4;
+    string text = 5;
+}
+
+service EmulatorController {
+    rpc sendKey(KeyboardEvent) returns (google.protobuf.Empty) {}
+}
