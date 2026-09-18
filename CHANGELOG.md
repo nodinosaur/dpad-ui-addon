@@ -4,7 +4,7 @@
 
 ### Added
 
-- Full Android Emulator compatibility via gRPC — sends D-Pad key events using the same mechanism as the Emulator's Extended Controls
+- Full Android Emulator compatibility via gRPC — D-Pad key events are sent to the emulator's `EmulatorController.sendKey` service as raw evdev codes, the same codes and the same guest-side input path (`user_event_keycode` → QEMU → guest evdev) that the Emulator's own Extended Controls D-Pad uses
 - Automatic device routing: emulators are detected and controlled via gRPC, physical devices continue to use ADB
 - Graceful fallback: if gRPC is unusable, the plugin falls back to ADB and stops retrying gRPC for that device
 - Proper keydown/keyup event support for emulators via evdev keycodes (previously ADB did not distinguish between down and up)
